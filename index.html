@@ -1,0 +1,785 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3dvr Nomad System</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(16, 24, 48, 0.82);
+      --panel-2: rgba(26, 38, 72, 0.88);
+      --text: #f4f7fb;
+      --muted: #b2bdd6;
+      --gold: #d7b56d;
+      --gold-soft: #f0d8a0;
+      --line: rgba(255,255,255,0.12);
+      --glow: rgba(215,181,109,0.25);
+      --accent: #7db8ff;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 22px;
+      --max: 1180px;
+    }* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(125,184,255,0.12), transparent 28%),
+    radial-gradient(circle at top left, rgba(215,181,109,0.14), transparent 25%),
+    linear-gradient(180deg, #111936 0%, #0b1020 38%, #070b16 100%);
+  color: var(--text);
+  line-height: 1.55;
+}
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+.clouds::before,
+.clouds::after {
+  content: "";
+  position: fixed;
+  inset: auto;
+  width: 380px;
+  height: 380px;
+  border-radius: 999px;
+  filter: blur(48px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.22;
+  animation: drift 28s linear infinite;
+  background: radial-gradient(circle, rgba(255,255,255,0.16), rgba(255,255,255,0.04) 45%, transparent 70%);
+}
+
+.clouds::before { top: 8%; left: -120px; }
+.clouds::after { top: 35%; right: -120px; animation-duration: 34s; }
+
+@keyframes drift {
+  0% { transform: translateX(0px); }
+  50% { transform: translateX(60px); }
+  100% { transform: translateX(0px); }
+}
+
+.wrap {
+  width: min(calc(100% - 32px), var(--max));
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(14px);
+  background: rgba(8, 12, 24, 0.72);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(215,181,109,0.28), rgba(125,184,255,0.22));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 0 24px var(--glow);
+  display: grid;
+  place-items: center;
+  color: var(--gold-soft);
+  font-size: 0.95rem;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  font-weight: 700;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.btn:hover { transform: translateY(-1px); }
+.btn-primary {
+  background: linear-gradient(135deg, #d7b56d, #f0d8a0);
+  color: #1d1709;
+  border-color: transparent;
+  box-shadow: 0 10px 30px rgba(215,181,109,0.28);
+}
+
+.btn-secondary { background: rgba(255,255,255,0.04); }
+
+.hero {
+  padding: 72px 0 36px;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--gold-soft);
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+h1, h2, h3 { line-height: 1.08; margin: 0 0 14px; }
+h1 {
+  font-size: clamp(2.5rem, 6vw, 5.6rem);
+  letter-spacing: -0.04em;
+  max-width: 10ch;
+}
+
+.hero p {
+  color: var(--muted);
+  font-size: 1.08rem;
+  max-width: 58ch;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 28px 0 18px;
+}
+
+.mini-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.stat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.stat strong {
+  display: block;
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+  color: var(--gold-soft);
+}
+
+.hero-card,
+.panel {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.hero-card {
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-visual {
+  min-height: 540px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 18px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.system-diagram {
+  position: relative;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)),
+    radial-gradient(circle at 70% 20%, rgba(125,184,255,0.18), transparent 30%),
+    radial-gradient(circle at 30% 70%, rgba(215,181,109,0.16), transparent 34%),
+    rgba(5, 10, 20, 0.72);
+  padding: 22px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.rig {
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 4 / 5;
+  position: relative;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 16px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(33,51,92,0.96), rgba(14,24,48,0.96));
+}
+
+.orb small {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.core {
+  width: 190px;
+  height: 190px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--gold-soft);
+  background: radial-gradient(circle at 30% 25%, rgba(240,216,160,0.18), rgba(25,36,64,0.96));
+  box-shadow: 0 0 0 12px rgba(215,181,109,0.06), 0 0 60px rgba(215,181,109,0.22);
+}
+
+.node-a { width: 120px; height: 120px; top: 2%; left: 50%; transform: translateX(-50%); }
+.node-b { width: 124px; height: 124px; right: 3%; top: 28%; }
+.node-c { width: 124px; height: 124px; right: 8%; bottom: 5%; }
+.node-d { width: 124px; height: 124px; left: 8%; bottom: 5%; }
+.node-e { width: 124px; height: 124px; left: 3%; top: 28%; }
+
+.line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(215,181,109,0.32), rgba(255,255,255,0.08));
+}
+
+.line-1 { width: 98px; transform: translate(-50%, -50%) rotate(-90deg) translateY(-108px); }
+.line-2 { width: 108px; transform: translate(-50%, -50%) rotate(-24deg) translateX(86px); }
+.line-3 { width: 118px; transform: translate(-50%, -50%) rotate(33deg) translateX(92px) translateY(52px); }
+.line-4 { width: 118px; transform: translate(-50%, -50%) rotate(147deg) translateX(92px) translateY(-52px); }
+.line-5 { width: 108px; transform: translate(-50%, -50%) rotate(204deg) translateX(86px); }
+
+section {
+  padding: 42px 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.section-head p {
+  color: var(--muted);
+  max-width: 54ch;
+  margin: 0;
+}
+
+.grid-3,
+.grid-2,
+.pricing-grid,
+.story-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.story-grid { grid-template-columns: 1.1fr 0.9fr; }
+.pricing-grid { grid-template-columns: 0.95fr 1.05fr; }
+
+.card {
+  padding: 22px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, rgba(215,181,109,0.18), rgba(125,184,255,0.18));
+  border: 1px solid rgba(255,255,255,0.12);
+  font-size: 1.4rem;
+}
+
+.card p, .card li { color: var(--muted); }
+.card h3 { font-size: 1.3rem; }
+
+ul.clean {
+  padding-left: 18px;
+  margin: 14px 0 0;
+}
+
+.feature-rail {
+  display: grid;
+  gap: 14px;
+}
+
+.rail-item {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+}
+
+.rail-visual {
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(240,216,160,0.18), transparent 30%),
+    linear-gradient(180deg, rgba(125,184,255,0.12), rgba(255,255,255,0.03)),
+    rgba(8,12,24,0.85);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+}
+
+.quote {
+  padding: 24px;
+  font-size: 1.15rem;
+  border-left: 4px solid var(--gold);
+}
+
+.price-card {
+  padding: 26px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(215,181,109,0.13), rgba(255,255,255,0.03));
+  border: 1px solid rgba(240,216,160,0.24);
+  box-shadow: 0 18px 50px rgba(215,181,109,0.12);
+}
+
+.price {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1;
+  margin: 10px 0;
+  color: var(--gold-soft);
+  font-weight: 900;
+}
+
+.muted { color: var(--muted); }
+
+.cta {
+  padding: 36px;
+  text-align: center;
+  background:
+    radial-gradient(circle at top, rgba(215,181,109,0.16), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius: 30px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.footer {
+  padding: 24px 0 56px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tag {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 980px) {
+  .hero-grid,
+  .story-grid,
+  .pricing-grid,
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-stats { grid-template-columns: 1fr; }
+  .nav-inner { align-items: flex-start; flex-direction: column; }
+  .hero { padding-top: 48px; }
+  .hero-visual { min-height: 460px; }
+  .section-head { align-items: start; flex-direction: column; }
+}
+
+@media (max-width: 640px) {
+  .wrap { width: min(calc(100% - 20px), var(--max)); }
+  h1 { max-width: 12ch; }
+  .rail-item {
+    grid-template-columns: 1fr;
+  }
+  .hero-card,
+  .card,
+  .price-card,
+  .cta { padding: 18px; }
+  .system-diagram { padding: 12px; }
+  .core { width: 150px; height: 150px; }
+  .node-a, .node-b, .node-c, .node-d, .node-e {
+    width: 98px;
+    height: 98px;
+    font-size: 0.92rem;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="clouds"></div>  <nav class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-mark">3D</div>
+        <div>
+          <div>3dvr.tech</div>
+          <div class="muted" style="font-size:0.82rem; font-weight:600;">Nomad System</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#system">System</a>
+        <a href="#modules">Modules</a>
+        <a href="#story">Why it matters</a>
+        <a href="#starter">Starter Kit</a>
+      </div>
+    </div>
+  </nav>  <header class="hero wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Portable life + work infrastructure for builders</div>
+        <h1>Tent. Backpack. Desk. Laptop. Phone. One system.</h1>
+        <p>
+          The 3dvr Nomad System is a modular mobile workstation for people who want to create, communicate,
+          and survive anywhere. It combines shelter, carry, power, computing, and connectivity into one
+          integrated setup built for digital nomads, open-source builders, and life on the move.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#starter">Join the Starter Kit</a>
+          <a class="btn btn-secondary" href="#modules">See the modules</a>
+        </div>
+        <div class="mini-stats">
+          <div class="stat">
+            <strong>5-in-1</strong>
+            Shelter, carry, desk, compute, and control in one ecosystem.
+          </div>
+          <div class="stat">
+            <strong>Modular</strong>
+            Start with off-the-shelf parts and evolve into custom hardware.
+          </div>
+          <div class="stat">
+            <strong>Open</strong>
+            Designed around repairability, standards, and open-source workflows.
+          </div>
+        </div>
+      </div><div class="hero-card">
+    <div class="hero-visual">
+      <div class="chip-row">
+        <div class="chip">Nomad life</div>
+        <div class="chip">Open hardware</div>
+        <div class="chip">Cloud + local</div>
+        <div class="chip">Builder culture</div>
+      </div>
+      <div class="system-diagram">
+        <div class="rig">
+          <div class="line line-1"></div>
+          <div class="line line-2"></div>
+          <div class="line line-3"></div>
+          <div class="line line-4"></div>
+          <div class="line line-5"></div>
+
+          <div class="orb core">3dvr Core<small>portable life + work system</small></div>
+          <div class="orb node-a">Tent<small>shelter mode</small></div>
+          <div class="orb node-b">Backpack<small>transport mode</small></div>
+          <div class="orb node-c">Desk<small>work mode</small></div>
+          <div class="orb node-d">Laptop<small>compute mode</small></div>
+          <div class="orb node-e">Phone<small>control mode</small></div>
+        </div>
+      </div>
+      <div class="muted">
+        A system for builders who refuse to separate living, working, and moving.
+      </div>
+    </div>
+  </div>
+</div>
+
+  </header>  <section id="system">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">The vision</div>
+          <h2>A mobile operating environment, not just a gadget.</h2>
+        </div>
+        <p>
+          Most gear solves one problem at a time. The 3dvr Nomad System is meant to solve the whole chain:
+          carry your essentials, deploy a workspace, keep your devices powered, and have a place to rest.
+        </p>
+      </div><div class="grid-3">
+    <div class="card">
+      <div class="icon">⚙️</div>
+      <h3>Designed from first principles</h3>
+      <p>
+        Built around portability, repairability, and real-world use instead of desk-bound assumptions.
+      </p>
+    </div>
+    <div class="card">
+      <div class="icon">🌍</div>
+      <h3>Works anywhere</h3>
+      <p>
+        Train, van, hotel, tent site, co-working space, or coffee shop. Your environment moves with you.
+      </p>
+    </div>
+    <div class="card">
+      <div class="icon">🧠</div>
+      <h3>Software-defined lifestyle</h3>
+      <p>
+        Tie the hardware together with 3dvr software, browser tools, sync, and AI-assisted workflows.
+      </p>
+    </div>
+  </div>
+</div>
+
+  </section>  <section id="modules">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">The modules</div>
+          <h2>Five pieces. One ecosystem.</h2>
+        </div>
+        <p>
+          Each part should be useful on its own, but stronger together. Start with existing gear, then refine
+          toward a custom 3dvr product line.
+        </p>
+      </div><div class="feature-rail">
+    <div class="rail-item">
+      <div class="rail-visual">🎒</div>
+      <div>
+        <h3>Backpack — the base unit</h3>
+        <p>
+          Carries the whole system and eventually becomes part of the desk structure. Houses power,
+          storage, cable routing, and your travel-ready tech stack.
+        </p>
+        <div class="tag-list">
+          <span class="tag">Hard + soft hybrid</span>
+          <span class="tag">Battery storage</span>
+          <span class="tag">Solar-ready</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-item">
+      <div class="rail-visual">🏕️</div>
+      <div>
+        <h3>Tent — the shelter layer</h3>
+        <p>
+          Lightweight, fast to deploy, and designed for living with devices. Internal hanging points,
+          warm lighting, airflow, and a compact footprint make it part of the working system.
+        </p>
+        <div class="tag-list">
+          <span class="tag">Ultralight</span>
+          <span class="tag">Device-friendly</span>
+          <span class="tag">Low-light living</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-item">
+      <div class="rail-visual">🧍</div>
+      <div>
+        <h3>Desk — the deployable workspace</h3>
+        <p>
+          A foldable or telescoping frame that creates an instant sit/stand setup. Meant for transit,
+          hotel rooms, temporary offices, and field work.
+        </p>
+        <div class="tag-list">
+          <span class="tag">Sit/stand</span>
+          <span class="tag">Fast deploy</span>
+          <span class="tag">Modular mounts</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-item">
+      <div class="rail-visual">💻</div>
+      <div>
+        <h3>Laptop — the compute core</h3>
+        <p>
+          Start with a repairable laptop or compact SBC stack. Eventually evolve toward a 3dvr-designed
+          open-source computer built for mobility, field serviceability, and cloud-linked workflows.
+        </p>
+        <div class="tag-list">
+          <span class="tag">Repairable</span>
+          <span class="tag">Linux-friendly</span>
+          <span class="tag">Cloud + local</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-item">
+      <div class="rail-visual">📱</div>
+      <div>
+        <h3>Phone — the control center</h3>
+        <p>
+          Your uplink, dashboard, scanner, camera, communication hub, and backup interface. The phone is
+          what makes the whole system feel alive while moving.
+        </p>
+        <div class="tag-list">
+          <span class="tag">Dockable</span>
+          <span class="tag">Hotspot-ready</span>
+          <span class="tag">Field control</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </section>  <section id="story">
+    <div class="wrap story-grid">
+      <div class="panel card">
+        <div class="eyebrow">Why it matters</div>
+        <h2>For people building a life outside the default template.</h2>
+        <p>
+          The future is not only remote work. It is mobile work, independent work, open work, and resilient work.
+          The 3dvr Nomad System is for creators who want to stay capable without being locked into fragile,
+          expensive, office-only infrastructure.
+        </p>
+        <ul class="clean">
+          <li>Digital nomads who want a serious setup, not just a laptop sleeve.</li>
+          <li>Builders, hackers, artists, and field operators who work between places.</li>
+          <li>People who want repairable gear and modular systems instead of disposable devices.</li>
+          <li>Anyone who sees life, shelter, mobility, and computing as one integrated design problem.</li>
+        </ul>
+      </div><div class="panel quote">
+    <p>
+      “Your office isn’t a place. Your system is.”
+    </p>
+    <p class="muted">
+      3dvr is about turning mobility, grit, and open-source thinking into something beautiful, useful,
+      and eventually productized.
+    </p>
+  </div>
+</div>
+
+  </section>  <section id="starter">
+    <div class="wrap pricing-grid">
+      <div class="price-card">
+        <div class="eyebrow">Starter direction</div>
+        <h2>Start with a real kit now.</h2>
+        <p class="muted">
+          Version one does not require reinventing every part. Begin with a curated stack, document the build,
+          and grow toward custom hardware over time.
+        </p>
+        <div class="price">v1</div>
+        <p class="muted">Off-the-shelf parts + smart integration + strong story.</p>
+        <div class="hero-actions" style="margin-top: 22px;">
+          <a class="btn btn-primary" href="#cta">Get early access</a>
+          <a class="btn btn-secondary" href="#roadmap">See roadmap</a>
+        </div>
+      </div><div class="card" id="roadmap">
+    <h3>What the first release can include</h3>
+    <ul class="clean">
+      <li>Curated backpack and compact tent combination</li>
+      <li>Portable desk frame or fold-out workstation solution</li>
+      <li>Repairable laptop or SBC-based compute option</li>
+      <li>Phone docking and charging workflow</li>
+      <li>Portable battery + USB-C power strategy</li>
+      <li>3dvr software layer, guides, and documentation</li>
+    </ul>
+    <h3 style="margin-top: 24px;">Long-term evolution</h3>
+    <ul class="clean">
+      <li>Custom backpack frame that transforms into desk support</li>
+      <li>Integrated power rails and cable routing</li>
+      <li>Open-source laptop and phone ecosystem</li>
+      <li>Accessory ecosystem for travel, health, and off-grid work</li>
+    </ul>
+  </div>
+</div>
+
+  </section>  <section>
+    <div class="wrap cta" id="cta">
+      <div class="eyebrow">Build it with us</div>
+      <h2>Help shape the first real 3dvr Nomad System.</h2>
+      <p class="muted" style="max-width: 58ch; margin: 0 auto 22px;">
+        Join the early community, follow the prototype journey, and be part of a product line focused on
+        mobility, repairability, open-source thinking, and full-spectrum life design.
+      </p>
+      <div class="hero-actions" style="justify-content:center; margin-top: 0;">
+        <a class="btn btn-primary" href="mailto:hello@3dvr.tech?subject=3dvr%20Nomad%20System%20Interest">Request early access</a>
+        <a class="btn btn-secondary" href="https://3dvr.tech">Visit 3dvr.tech</a>
+      </div>
+    </div>
+  </section>  <footer class="wrap footer">
+    <div>3dvr.tech — open systems for life, work, and movement.</div>
+  </footer>
+</body>
+</html>
